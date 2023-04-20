@@ -1,13 +1,76 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&family=Rubik&display=swap');
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
+  font-family: 'Inter', sans-serif;
+  font-weight: 400;
+  background: linear-gradient(0.08deg, rgba(1, 43, 105, 0.52) 7.94%, rgba(1, 37, 97, 0.72) 47.74%, #00235D 80.02%);
+  min-height: 100vh;
+  background-repeat: no-repeat;
+  font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+.search-input{
+  font-family: 'Rubik', sans-serif;
+  color: #CCCCCC;
+  border: 1px solid #FFFFFF;
+}
+
+.bg-card{
+  background: linear-gradient(270deg, rgba(23, 38, 92, 0.6) -6.38%, rgba(2, 110, 189, 0.408) 107.1%);
+  border-radius: 16px;
+}
+
+.bg-card-forecast{
+  background: linear-gradient(360deg, rgba(1, 24, 78, 0.444) 15.42%, rgba(1, 37, 97, 0.462) 54.1%, rgba(0, 29, 87, 0.45) 92.97%);
+  border-radius: 16px;
+}
+
+.text-weather-heading{
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.border-forecast{
+  border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+}
+
+
+.toggle-button {
+  display: inline-block;
+  position: relative;
+  width: 60px;
+  height: 34px;
+  border-radius: 17px;
+  border: 2px solid #ccc;
+  background-color: #fafafa;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.toggle-button.on {
+  background-color: #4caf50;
+  border-color: #4caf50;
+}
+
+.toggle-button__thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background-color: #fff;
+  box-shadow: 0 2px 2px rgba(0, 0, 0, 0.14), 0 1px 5px rgba(0, 0, 0, 0.12), 0 3px 1px -2px rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s;
+}
+
+.toggle-button.on .toggle-button__thumb {
+  transform: translateX(26px);
 }
