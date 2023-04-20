@@ -5,8 +5,6 @@ import WeatherData from './assets/data/weatherdata';
 import WeatherCard from './components/weather-card';
 import Forecast from './components/forecast';
 import TemperatureCard from './components/temeperature-card';
-import ToggleButton from './components/togglebutton';
-
 
 
 function App() {
@@ -80,12 +78,10 @@ function App() {
 
     axios.get(url).then((response) => {
       setData(response.data);
-      console.log(response.data);
     })
 
     axios.get(url2).then((response) => {
       setRain(response.data);
-      console.log(response.data, "Rain");
     })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
