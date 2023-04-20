@@ -43,26 +43,6 @@ function App() {
   }, [location]);
 
 
-
-  const successCallback = (position) => {
-    setLatitude(position?.coords?.latitude);
-    setLongitude(position?.coords?.longitude);
-  };
-
-  const errorCallback = (error) => {
-    console.error(error);
-  };
-
-
-
-  const getTime = (value) => {
-    const date = new Date(value);
-    const formattedTime = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-    const formattedTime2 = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
-    return date.getMinutes() === 0 ? formattedTime2 : formattedTime;
-  }
-
-
   useEffect(() => {
     if (location === '') {
       if (navigator.geolocation) {
@@ -107,9 +87,27 @@ function App() {
     }
   }
 
+  const successCallback = (position) => {
+    setLatitude(position?.coords?.latitude);
+    setLongitude(position?.coords?.longitude);
+  };
+
+  const errorCallback = (error) => {
+    console.error(error);
+  };
+
+  const getTime = (value) => {
+    const date = new Date(value);
+    const formattedTime = date.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+    const formattedTime2 = date.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+    return date.getMinutes() === 0 ? formattedTime2 : formattedTime;
+  }
+
   const getWeatherIcon = (weathercode) => {
     return WeatherData?.find(x => x.id === weathercode)?.icon
   }
+
+
   const getWeatherDescription = (weathercode) => {
     return WeatherData?.find(x => x.id === weathercode)?.description
   }
@@ -131,7 +129,6 @@ function App() {
       data?.hourly.time.map((x) =>
         new Date(x)
       )
-      ;
 
     const closestIndex = datetimeArray.findIndex(datetime => {
       const datetimeDiff = Math.abs(datetime.getTime() - (value ? new Date(value).getTime() : new Date().getTime()));
@@ -179,6 +176,7 @@ function App() {
       imageRect: temperatureRect
     }
   ]
+
   const hourlyData = [
     {
       time: "Now",
@@ -256,7 +254,6 @@ function App() {
   return (
     <div>
       
-
       <div className="lg:w-1/5 flex lg:justify-end justify-center px-6 lg:px-0 items-center relative lg:ml-auto pt-9 lg:pr-12">
 
         <div className="absolute pl-10 lg:pl-3 w-10 inset-y-0 left-0 items-center py-12 pointer-events-none">
@@ -296,9 +293,6 @@ function App() {
           </li>
         ))}
       </ul>
-
-      
-
 
       <div className='lg:max-w-[75vw] mx-auto lg:pt-20 flex flex-col lg:flex-row lg:items-stretch lg:justify-center lg:space-x-9 p-6 lg:p-0 space-y-6 lg:space-y-0'>
         
@@ -382,7 +376,7 @@ function App() {
       <div className='lg:max-w-[75vw] mx-auto lg:pt-20 flex flex-col lg:flex-row lg:items-stretch lg:justify-center lg:space-x-9 p-6 lg:p-0 space-y-6 lg:space-y-0 pb-16 lg:pb-16'>
         
         {/* Forecast Data */}
-        <div className='lg:w-[50%] bg-card-forecast pt-8 px-6'>
+        <div className='lg:w-[50%] bg-card-forecast pt-8 px-2 md:px-6'>
           <h3 className='w-full text-white border-forecast pb-2 mb-5'>5-DAY FORECAST</h3>
 
           {forecastData?.map((data, i) => (
