@@ -6,6 +6,7 @@ import WeatherCard from './components/weather-card';
 import Forecast from './components/forecast';
 import TemperatureCard from './components/temeperature-card';
 import SelectInput from './components/select-input';
+import Loading from './components/loading';
 
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
   const [fahrenheit, setFahrenheit] = useState(false);
+  const [loading, setLoading] = useState(true);
 
   const [suggestions, setSuggestions] = useState([]);
 
@@ -54,17 +56,19 @@ function App() {
       }
     }
 
-    
+
     const url = fahrenheit ? `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relativehumidity_2m,rain,weathercode,windspeed_10m,dewpoint_2m&daily=sunrise,sunset,rain_sum&current_weather=true&timezone=auto&temperature_unit=fahrenheit` : `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relativehumidity_2m,rain,weathercode,windspeed_10m,dewpoint_2m&daily=sunrise,sunset,rain_sum&current_weather=true&timezone=auto`
 
     const url2 = fahrenheit ? `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=rain_sum&forecast_days=14&timezone=auto&temperature_unit=fahrenheit` : `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=rain_sum&forecast_days=14&timezone=auto`
 
     axios.get(url).then((response) => {
       setData(response.data);
+      setLoading(false);
     })
 
     axios.get(url2).then((response) => {
       setRain(response.data);
+      setLoading(false);
     })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -75,6 +79,7 @@ function App() {
 
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${location}&limit=5`
 
+      setLoading(true)
       axios.get(url).then((response) => {
         setLongitude(response.data[0]?.lon);
         setLatitude(response.data[0]?.lat);
@@ -83,6 +88,8 @@ function App() {
     if (!event.key && event) {
       const url = `https://nominatim.openstreetmap.org/search?format=json&q=${location}&limit=5`
 
+      
+      setLoading(true)
       axios.get(url).then((response) => {
         setLongitude(response.data[0]?.lon);
         setLatitude(response.data[0]?.lat);
@@ -255,189 +262,198 @@ function App() {
 
 
   return (
-    <div>
-      <div className='lg:w-1/5 flex lg:justify-end justify-center px-6 lg:px-0 items-center relative lg:ml-auto pt-4 lg:pr-12'>
-        <SelectInput
-          label={""}
-          value={fahrenheit ? "Fahrenheit" : "Celsius"}
-          onChange={() => setFahrenheit(!fahrenheit)}
-        >
-          {["Celsius", "Fahrenheit"].map((temp, i) => (
-            <option key={i} value={temp}>{temp}</option>
-          ))}
-        </SelectInput>
-        </div>  
-      <div className="lg:w-1/5 flex lg:justify-end justify-center px-6 lg:px-0 items-center relative lg:ml-auto pt-9 lg:pr-12">
-
-        <div className="absolute pl-10 lg:pl-3 w-10 inset-y-0 left-0 items-center py-12 pointer-events-none">
-          <svg
-            className="w-5 h-5 text-[#CCCCCC]"
-            aria-hidden="true"
-            fill="currentColor"
-            viewBox="0 0 20 20">
-            <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
-          </svg>
-          <span className="sr-only">Search icon</span>
-        </div>
-        <input
-          type={'text'}
-          placeholder={'Search location'}
-          name={'location'}
-          id={'location'}
-          value={location}
-          onChange={(e) => setLocation(e.target.value)}
-          onKeyPress={searchLocation}
-          className="py-3 pl-10 text-sm rounded-lg focus:outline-none w-full bg-transparent search-input"
-        />
-
-      </div>
-      <ul className='lg:w-1/5 flex flex-col justify-center px-6 lg:px-0 lg:justify-end items-center relative ml-auto lg:pr-12  text-white'>
-        {suggestions.map((suggestion, i) => (
-          <li key={i}>
-            <button
-              onClick={() => {
-                setLocation(suggestion.label);
-                setSuggestions([]);
-                searchLocation(suggestion.label);
-              }}
+    <>
+      {loading &&
+        <Loading title={"Fetching Data"} />
+      }
+      {
+        !loading &&
+        <div>
+          <div className='lg:w-1/5 flex lg:justify-end justify-center px-6 lg:px-0 items-center relative lg:ml-auto pt-4 lg:pr-12'>
+            <SelectInput
+              label={""}
+              value={fahrenheit ? "Fahrenheit" : "Celsius"}
+              onChange={() => setFahrenheit(!fahrenheit)}
             >
-              {suggestion.label}
-            </button>
-          </li>
-        ))}
-      </ul>
-
-      <div className='lg:max-w-[75vw] mx-auto lg:pt-20 flex flex-col lg:flex-row lg:items-stretch lg:justify-center lg:space-x-9 p-6 lg:p-0 space-y-6 lg:space-y-0'>
-        
-        {/* Temperature Summary Card */}
-        <TemperatureCard
-          image={locationMarker}
-          location={location}
-          Content1={
-            <div>
-              <img src={`https://openweathermap.org/img/wn/${getWeatherIcon(data?.current_weather?.weathercode)}@2x.png`} alt="Weather icon" className='' />
-            </div>
-          }
-          Content2={
-            <div className='pl-4 pb-4 text-white'>
-              <h1 className='text-[38px]'>{(data?.current_weather?.temperature)}<sup>{data?.hourly_units?.temperature_2m}</sup></h1>
-              <div className='flex items-center'>
-                <img src={`https://openweathermap.org/img/wn/${getWeatherIcon(data?.current_weather?.weathercode)}@2x.png`} alt="Weather icon" className='w-[31.85px] h-[40px]' />
-                <h3>{getWeatherDescription(data?.current_weather?.weathercode)}</h3>
-
-              </div>
-            </div>
-          }
-        />
-
-        {/* Sunset & Sunrise */}
-        <WeatherCard
-          image={sunriseIcon}
-          alt={"sunrise Icon"}
-          text="SUNRISE"
-          Content1={
-            <h2 className='pt-4 text-white text-[32px]'>
-              {getTime(data?.daily?.sunrise[0])}
-            </h2>
-          }
-          Content2={
-            <img src={sunRainbow} alt="sun rainbow" className="pt-6" />
-          }
-          Content3={
-            <h3 className='pt-6 pb-4 text-white'>
-              Sunset: {getTime(data?.daily?.sunset[0])}
-            </h3>
-          }
-        />
-
-        {/* Rainfall */}
-        <WeatherCard
-          image={rainfallIcon}
-          alt={"rainfall icon"}
-          text={"RAINFALL"}
-          Content1={
-            <div className='pt-4 flex flex-col'>
-              <h2 className='text-white text-[32px]'>
-                {data?.daily?.rain_sum[0]}{data?.daily_units?.rain_sum}
-              </h2>
-              <span className='text-white text-[12px]'>in last 24h</span>
-            </div>
-          }
-          Content2={
-            <h3 className='pt-14 pb-4 text-white'>
-              Next expected is {rain?.daily?.rain_sum[getNextRain()]}{rain?.daily_units?.rain_sum} on {getDayOfWeek(rain?.daily?.time[getNextRain()])}
-            </h3>
-          }
-        />
-      </div>
-
-      <div className='lg:max-w-[75vw] lg:mx-auto mx-6 pt-8 px-6 mt-8 flex flex-col bg-card'>
-        <h3 className='w-full text-white border-forecast pb-2 mb-5'>CONDITION THROUGHOUT TODAY</h3>
-        <div className="flex lg:flex-row flex-col">
-        {hourlyData?.map((data, i) => (
-          <div className='flex lg:flex-col items-center justify-between mr-3 pb-4 text-white'>
-            <h3>{data.time}</h3>
-          <img src={data.image} alt="" />
-            <span>{data.temperature} { data.temperature === 'Sunrise' || data.temperature === 'Sunset' ? '' : '°'}</span>
+              {["Celsius", "Fahrenheit"].map((temp, i) => (
+                <option key={i} value={temp}>{temp}</option>
+              ))}
+            </SelectInput>
           </div>
-          
-        ))}
-        </div>
-      </div>
-      
-      
-      <div className='lg:max-w-[75vw] mx-auto lg:pt-20 flex flex-col lg:flex-row lg:items-stretch lg:justify-center lg:space-x-9 p-6 lg:p-0 space-y-6 lg:space-y-0 pb-16 lg:pb-16'>
-        
-        {/* Forecast Data */}
-        <div className='lg:w-[50%] bg-card-forecast pt-8 px-2 md:px-6'>
-          <h3 className='w-full text-white border-forecast pb-2 mb-5'>5-DAY FORECAST</h3>
+          <div className="lg:w-1/5 flex lg:justify-end justify-center px-6 lg:px-0 items-center relative lg:ml-auto pt-9 lg:pr-12">
 
-          {forecastData?.map((data, i) => (
-            <Forecast
-              day={data.day}
-              image={data.image}
-              tempSunrise={data.tempSunrise}
-              tempSunSet={data.tempSunSet}
-              imageRect={data.imageRect}
+            <div className="absolute pl-10 lg:pl-3 w-10 inset-y-0 left-0 items-center py-12 pointer-events-none">
+              <svg
+                className="w-5 h-5 text-[#CCCCCC]"
+                aria-hidden="true"
+                fill="currentColor"
+                viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clip-rule="evenodd"></path>
+              </svg>
+              <span className="sr-only">Search icon</span>
+            </div>
+            <input
+              type={'text'}
+              placeholder={'Search location'}
+              name={'location'}
+              id={'location'}
+              value={location}
+              onChange={(e) => setLocation(e.target.value)}
+              onKeyPress={searchLocation}
+              className="py-3 pl-10 text-sm rounded-lg focus:outline-none w-full bg-transparent search-input"
             />
-          ))}
 
+          </div>
+          <ul className='lg:w-1/5 flex flex-col justify-center px-6 lg:px-0 lg:justify-end items-center relative ml-auto lg:pr-12  text-white'>
+            {suggestions.map((suggestion, i) => (
+              <li key={i}>
+                <button
+                  onClick={() => {
+                    setLocation(suggestion.label);
+                    setSuggestions([]);
+                    searchLocation(suggestion.label);
+                  }}
+                >
+                  {suggestion.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+
+          <div className='lg:max-w-[75vw] mx-auto lg:pt-20 flex flex-col lg:flex-row lg:items-stretch lg:justify-center lg:space-x-9 p-6 lg:p-0 space-y-6 lg:space-y-0'>
+
+            {/* Temperature Summary Card */}
+            <TemperatureCard
+              image={locationMarker}
+              location={location}
+              Content1={
+                <div>
+                  <img src={`https://openweathermap.org/img/wn/${getWeatherIcon(data?.current_weather?.weathercode)}@2x.png`} alt="Weather icon" className='' />
+                </div>
+              }
+              Content2={
+                <div className='pl-4 pb-4 text-white'>
+                  <h1 className='text-[38px]'>{(data?.current_weather?.temperature)}<sup>{data?.hourly_units?.temperature_2m}</sup></h1>
+                  <div className='flex items-center'>
+                    <img src={`https://openweathermap.org/img/wn/${getWeatherIcon(data?.current_weather?.weathercode)}@2x.png`} alt="Weather icon" className='w-[31.85px] h-[40px]' />
+                    <h3>{getWeatherDescription(data?.current_weather?.weathercode)}</h3>
+
+                  </div>
+                </div>
+              }
+            />
+
+            {/* Sunset & Sunrise */}
+            <WeatherCard
+              image={sunriseIcon}
+              alt={"sunrise Icon"}
+              text="SUNRISE"
+              Content1={
+                <h2 className='pt-4 text-white text-[32px]'>
+                  {getTime(data?.daily?.sunrise[0])}
+                </h2>
+              }
+              Content2={
+                <img src={sunRainbow} alt="sun rainbow" className="pt-6" />
+              }
+              Content3={
+                <h3 className='pt-6 pb-4 text-white'>
+                  Sunset: {getTime(data?.daily?.sunset[0])}
+                </h3>
+              }
+            />
+
+            {/* Rainfall */}
+            <WeatherCard
+              image={rainfallIcon}
+              alt={"rainfall icon"}
+              text={"RAINFALL"}
+              Content1={
+                <div className='pt-4 flex flex-col'>
+                  <h2 className='text-white text-[32px]'>
+                    {data?.daily?.rain_sum[0]}{data?.daily_units?.rain_sum}
+                  </h2>
+                  <span className='text-white text-[12px]'>in last 24h</span>
+                </div>
+              }
+              Content2={
+                <h3 className='pt-14 pb-4 text-white'>
+                  Next expected is {rain?.daily?.rain_sum[getNextRain()]}{rain?.daily_units?.rain_sum} on {getDayOfWeek(rain?.daily?.time[getNextRain()])}
+                </h3>
+              }
+            />
+          </div>
+
+          <div className='lg:max-w-[75vw] lg:mx-auto mx-6 pt-8 px-6 mt-8 flex flex-col bg-card'>
+            <h3 className='w-full text-white border-forecast pb-2 mb-5'>CONDITION THROUGHOUT TODAY</h3>
+            <div className="flex lg:flex-row flex-col">
+              {hourlyData?.map((data, i) => (
+                <div className='flex lg:flex-col items-center justify-between mr-3 pb-4 text-white'>
+                  <h3>{data.time}</h3>
+                  <img src={data.image} alt="" />
+                  <span>{data.temperature} {data.temperature === 'Sunrise' || data.temperature === 'Sunset' ? '' : '°'}</span>
+                </div>
+
+              ))}
+            </div>
+          </div>
+
+
+          <div className='lg:max-w-[75vw] mx-auto lg:pt-20 flex flex-col lg:flex-row lg:items-stretch lg:justify-center lg:space-x-9 p-6 lg:p-0 space-y-6 lg:space-y-0 pb-16 lg:pb-16'>
+
+            {/* Forecast Data */}
+            <div className='lg:w-[50%] bg-card-forecast pt-8 px-2 md:px-6'>
+              <h3 className='w-full text-white border-forecast pb-2 mb-5'>5-DAY FORECAST</h3>
+
+              {forecastData?.map((data, i) => (
+                <Forecast
+                  day={data.day}
+                  image={data.image}
+                  tempSunrise={data.tempSunrise}
+                  tempSunSet={data.tempSunSet}
+                  imageRect={data.imageRect}
+                />
+              ))}
+
+            </div>
+
+            {/* Humidity Data */}
+            <WeatherCard
+              image={humidityIcon}
+              alt={"humidity Icon"}
+              text={"HUMIDITY"}
+              Content1={
+                <h2 className='pt-4 text-white text-[32px]'>
+                  {data?.hourly?.relativehumidity_2m[getClosestIndex()]}{data?.hourly_units?.relativehumidity_2m}
+                </h2>
+              }
+              Content2={
+                <h3 className='pt-24 pb-4 text-white'>
+                  The dew point is {data?.hourly?.dewpoint_2m[getClosestIndex()]}{data?.hourly_units?.dewpoint_2m} right now.
+                </h3>}
+            />
+
+            {/* Wind Data */}
+            <WeatherCard
+              image={windIcon}
+              alt={"wind icon"}
+              text="WIND"
+              Content1={
+                <h2 className='pt-4 text-white text-[32px]'>
+                  {data?.hourly?.windspeed_10m[getClosestIndex()]}{data?.hourly_units?.windspeed_10m}
+                </h2>
+              }
+              Content2={
+                <h3 className='pt-24 pb-4 text-white'>
+                  Time Now: {getTime(new Date())}
+                </h3>
+              }
+            />
+          </div>
         </div>
+      }
+    </>
 
-        {/* Humidity Data */}
-        <WeatherCard
-          image={humidityIcon}
-          alt={"humidity Icon"}
-          text={"HUMIDITY"}
-          Content1={
-            <h2 className='pt-4 text-white text-[32px]'>
-              {data?.hourly?.relativehumidity_2m[getClosestIndex()]}{data?.hourly_units?.relativehumidity_2m}
-            </h2>
-          }
-          Content2={
-            <h3 className='pt-24 pb-4 text-white'>
-              The dew point is {data?.hourly?.dewpoint_2m[getClosestIndex()]}{data?.hourly_units?.dewpoint_2m} right now.
-            </h3>}
-        />
-
-        {/* Wind Data */}
-        <WeatherCard
-          image={windIcon}
-          alt={"wind icon"}
-          text="WIND"
-          Content1={
-            <h2 className='pt-4 text-white text-[32px]'>
-              {data?.hourly?.windspeed_10m[getClosestIndex()]}{data?.hourly_units?.windspeed_10m}
-            </h2>
-          }
-          Content2={
-            <h3 className='pt-24 pb-4 text-white'>
-              Time Now: {getTime(new Date())}
-            </h3>
-          }
-        />
-      </div>
-    </div>
   );
 }
 
