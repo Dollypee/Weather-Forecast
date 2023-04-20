@@ -5,6 +5,7 @@ import WeatherData from './assets/data/weatherdata';
 import WeatherCard from './components/weather-card';
 import Forecast from './components/forecast';
 import TemperatureCard from './components/temeperature-card';
+import SelectInput from './components/select-input';
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
   const [rain, setRain] = useState({});
   const [latitude, setLatitude] = useState('');
   const [longitude, setLongitude] = useState('');
+  const [fahrenheit, setFahrenheit] = useState(false);
 
   const [suggestions, setSuggestions] = useState([]);
 
@@ -52,9 +54,10 @@ function App() {
       }
     }
 
-    const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relativehumidity_2m,rain,weathercode,windspeed_10m,dewpoint_2m&daily=sunrise,sunset,rain_sum&current_weather=true&timezone=auto`
+    
+    const url = fahrenheit ? `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relativehumidity_2m,rain,weathercode,windspeed_10m,dewpoint_2m&daily=sunrise,sunset,rain_sum&current_weather=true&timezone=auto&temperature_unit=fahrenheit` : `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&hourly=temperature_2m,relativehumidity_2m,rain,weathercode,windspeed_10m,dewpoint_2m&daily=sunrise,sunset,rain_sum&current_weather=true&timezone=auto`
 
-    const url2 = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=rain_sum&forecast_days=14&timezone=auto`
+    const url2 = fahrenheit ? `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=rain_sum&forecast_days=14&timezone=auto&temperature_unit=fahrenheit` : `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&daily=rain_sum&forecast_days=14&timezone=auto`
 
     axios.get(url).then((response) => {
       setData(response.data);
@@ -65,7 +68,7 @@ function App() {
     })
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [longitude, latitude])
+  }, [longitude, latitude, fahrenheit])
 
   const searchLocation = (event) => {
     if (event?.key && event.key === 'Enter') {
@@ -253,7 +256,17 @@ function App() {
 
   return (
     <div>
-      
+      <div className='lg:w-1/5 flex lg:justify-end justify-center px-6 lg:px-0 items-center relative lg:ml-auto pt-4 lg:pr-12'>
+        <SelectInput
+          label={""}
+          value={fahrenheit ? "Fahrenheit" : "Celsius"}
+          onChange={() => setFahrenheit(!fahrenheit)}
+        >
+          {["Celsius", "Fahrenheit"].map((temp, i) => (
+            <option key={i} value={temp}>{temp}</option>
+          ))}
+        </SelectInput>
+        </div>  
       <div className="lg:w-1/5 flex lg:justify-end justify-center px-6 lg:px-0 items-center relative lg:ml-auto pt-9 lg:pr-12">
 
         <div className="absolute pl-10 lg:pl-3 w-10 inset-y-0 left-0 items-center py-12 pointer-events-none">
